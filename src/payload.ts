@@ -46,7 +46,7 @@ export class Payload {
     const healthCertificate = body.decodedData["-260"];
     const covidCertificate = healthCertificate["1"]; // Version number subject to change
 
-    if (covidCertificate == undefined) {
+    if (!covidCertificate) {
       throw new Error("certificateData");
     }
 
@@ -54,10 +54,10 @@ export class Payload {
     const nameInformation = covidCertificate["nam"];
     const dateOfBirth = covidCertificate["dob"];
 
-    if (nameInformation == undefined) {
+    if (!nameInformation) {
       throw new Error("nameMissing");
     }
-    if (dateOfBirth == undefined) {
+    if (!dateOfBirth) {
       throw new Error("dobMissing");
     }
 

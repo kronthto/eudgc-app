@@ -2,11 +2,8 @@
 // and https://github.com/ehn-dcc-development/dgc-check-mobile-app/blob/main/src/app/cose-js/sign.js
 
 import { DecodedData } from './payload'
+import {Cert} from './allCerts'
 
-type Cert = {
-  kid: string;
-  verifier: any;
-};
 type CoseKeyHeader = {
   4: Uint8Array;
 };
@@ -19,7 +16,6 @@ const base45 = require("base45");
 const pako = require("pako");
 const cbor = require("cbor-js");
 const cose = require("cose-js");
-const certs: Array<Cert> = require("./data/allCertsPrepped.json");
 
 export function typedArrayToBufferSliced(array: Uint8Array): ArrayBuffer {
   return array.buffer.slice(
@@ -77,14 +73,18 @@ export function decodeData(data: string): Promise<DecodeResult> {
 }
 
 function verify(rawCose: Buffer, header: CoseKeyHeader) {
-  return new Promise((resolve, reject) => {
-    let kid = Buffer.from(header[4]).toString("base64");
-    let key = certs.find((cert) => cert.kid === kid);
+  // @ts-ignore
+  return import("./allCerts").then((mod) => {
+    const certs:Array<Cert> = mod.default;
+    return new Promise((resolve, reject) => {
+      let kid = Buffer.from(header[4]).toString("base64");
+      let key = certs.find((cert) => cert.kid === kid);
 
-    if (!key) {
-      return reject("Key not found");
-    }
+      if (!key) {
+        return reject("Key not found");
+      }
 
-    cose.sign.verify(rawCose, key.verifier).then(() => resolve(key), reject);
-  });
+      cose.sign.verify(rawCose, key.verifier).then(() => resolve(key), reject);
+    });
+  })
 }
