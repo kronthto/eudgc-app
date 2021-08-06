@@ -1,10 +1,11 @@
 import { PayloadBody } from "./payload";
 import { decodeData } from "./decode";
 import { Result } from "@zxing/library";
+import { PassData } from './pass';
 
 export async function getPayloadBodyFromQR(
   qrCodeResult: Result
-): Promise<PayloadBody> {
+): Promise<PassData> {
   // Get raw data
   let rawData = qrCodeResult.getText();
 
@@ -17,9 +18,9 @@ export async function getPayloadBodyFromQR(
     throw Error("invalidQrCode");
   }
 
-  return {
+  return PassData.generatePass({
     rawData: rawData,
     decodedData: decodedData.decoded,
     verification: decodedData.verification,
-  };
+  });
 }

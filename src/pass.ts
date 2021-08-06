@@ -14,7 +14,7 @@ export class PassData {
   generic: PassDictionary;
   properties: object;
 
-  static async generatePass(payloadBody: PayloadBody): Promise<string> {
+  static async generatePass(payloadBody: PayloadBody): Promise<PassData> {
     // Get the Value Sets from GitHub
     const valueSets: ValueSets = await ValueSets.loadValueSets();
 
@@ -30,10 +30,7 @@ export class PassData {
     // Create pass data
     const pass: PassData = new PassData(payload, qrCode);
 
-    // Create pass.json
-    const passJson = JSON.stringify(pass, null, 2);
-
-    return passJson;
+    return pass;
   }
 
   private constructor(payload: Payload, qrCode: QrCode) {
