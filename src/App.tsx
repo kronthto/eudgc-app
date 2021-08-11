@@ -1,6 +1,8 @@
 import React from "react";
 import "./App.css";
-import type { BrowserQRCodeReader } from "@zxing/browser";
+import type { BrowserQRCodeReader,IScannerControls } from "@zxing/browser";
+import {addCert,getCerts} from './db';
+import type {PassData} from './pass';
 
 interface IProps {}
 
@@ -8,17 +10,20 @@ interface IState {
   captureDev: string | null;
   devs: Array<any>;
   done: Boolean;
+  saved: Array<PassData>;
   output: string | null;
 }
 
 class App extends React.Component<IProps, IState> {
   codeReader!: BrowserQRCodeReader;
+  vidControls!: IScannerControls;
 
   constructor(props: any) {
     super(props);
 
     this.state = {
       devs: [],
+      saved: [],
       captureDev: null,
       done: false,
       output: null,
@@ -43,23 +48,30 @@ class App extends React.Component<IProps, IState> {
     let cb = () => cbp.then((actualcb) => actualcb());
 
     if ("permissions" in navigator) {
+      // todo: use request method once supported
       navigator.permissions.query({ name: "camera" }).then(cb, cb);
     } else {
       cb();
     }
+
+    getCerts().then(certs => {
+      this.setState({saved:Object.values(certs)});
+    })
   }
 
   startVideoCapture(deviceId: string) {
-    this.setState({ captureDev: deviceId });
+    this.setState({ captureDev: deviceId, done:false });
     this.codeReader.decodeFromVideoDevice(
       deviceId,
       this.refs.vid as HTMLVideoElement,
       (result, error, controls) => {
+        this.vidControls = controls;
         if (result !== undefined) {
           import("./process").then((mod) => {
             mod
               .getPayloadBodyFromQR(result)
               .then((pass) => {
+                addCert(pass);
                 this.setState({
                   output: JSON.stringify(pass, null, 2),
                   done: true,
@@ -72,7 +84,7 @@ class App extends React.Component<IProps, IState> {
 
           controls.stop();
         }
-        if (error !== undefined) {
+        if (error !== undefined && error.message) {
           this.setState({ output: error.message });
         }
       }
@@ -114,6 +126,25 @@ class App extends React.Component<IProps, IState> {
           </code>
         </main>
         <hr />
+        {this.state.saved.length && <><section>
+          Previous scans:
+          {this.state.saved.map((cert) => (
+            <div
+              onClick={() => {
+                if (this.vidControls) {
+                this.vidControls.stop();
+                }
+                this.setState({
+                  output: JSON.stringify(cert, null, 2),
+                  done: true,
+                });
+              }}
+              style={{ padding: "5px" }}
+            >
+              {cert.generic.name} {cert.generic.uvci}
+            </div>
+          ))}
+          </section><hr/></>}
         <section>
           <p style={{ textAlign: "left" }}>
             About: QR-Code-Scanning, verifying and extracting/decoding of

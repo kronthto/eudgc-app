@@ -13,11 +13,9 @@ interface Field {
 }
 
 export interface PassDictionary {
-  headerFields: Array<Field>;
-  primaryFields: Array<Field>;
-  secondaryFields: Array<Field>;
-  auxiliaryFields: Array<Field>;
-  backFields: Array<Field>;
+  fields: Array<Field>;
+  name: string;
+  uvci: string;
 }
 
 type HealthCert = {
@@ -109,27 +107,13 @@ export class Payload {
     const country : string = ((valueSets.countryCodes as any)[countryCode]).display;
 
     const generic: PassDictionary = {
-      headerFields: [
+      uvci: uvci,
+      name: name,
+      fields: [
         {
           key: "type",
           label: "EU Digital COVID",
           value: this.certificateType,
-        },
-      ],
-      primaryFields: [
-        {
-          key: "name",
-          label: "Name",
-          value: name,
-        },
-      ],
-      secondaryFields: [],
-      auxiliaryFields: [],
-      backFields: [
-        {
-          key: "uvci",
-          label: "Unique Certificate Identifier (UVCI)",
-          value: uvci,
         },
         {
           key: "issuer",
@@ -181,7 +165,7 @@ export class Payload {
         ].display.replace(/\s*\([^)]*\)\s*/g, "");
         const manufacturer = valueSets.manufacturers[manufacturerKey].display;
 
-        data.secondaryFields.push(
+        data.fields.push(
           ...[
             {
               key: "dose",
@@ -195,7 +179,7 @@ export class Payload {
             },
           ]
         );
-        data.auxiliaryFields.push(
+        data.fields.push(
           ...[
             {
               key: "vaccine",
@@ -209,7 +193,7 @@ export class Payload {
             },
           ]
         );
-        data.backFields.push(
+        data.fields.push(
           ...[
             {
               key: "cov",
@@ -244,7 +228,7 @@ export class Payload {
           testDateTimeString.replace(/.*T/, "").replace("Z", " ") + "UTC";
         const testDate = testDateTimeString.replace(/T.*/, "");
 
-        data.secondaryFields.push(
+        data.fields.push(
           ...[
             {
               key: "result",
@@ -258,7 +242,7 @@ export class Payload {
             },
           ]
         );
-        data.auxiliaryFields.push(
+        data.fields.push(
           ...[
             {
               key: "time",
@@ -272,18 +256,18 @@ export class Payload {
             },
           ]
         );
-        data.backFields.push({
+        data.fields.push({
           key: "cot",
           label: "Country of Test",
           value: country,
         });
         if (testingCentre !== undefined)
-          data.backFields.push({
+          data.fields.push({
             key: "centre",
             label: "Testing Centre",
             value: testingCentre,
           });
-        data.backFields.push(
+        data.fields.push(
           ...[
             {
               key: "test",
@@ -298,7 +282,7 @@ export class Payload {
         const validFrom = properties["df"];
         const validUntil = properties["du"];
 
-        data.secondaryFields.push(
+        data.fields.push(
           ...[
             {
               key: "until",
@@ -312,7 +296,7 @@ export class Payload {
             },
           ]
         );
-        data.auxiliaryFields.push(
+        data.fields.push(
           ...[
             {
               key: "from",
@@ -326,7 +310,7 @@ export class Payload {
             },
           ]
         );
-        data.backFields.push(
+        data.fields.push(
           ...[
             {
               key: "cot",
