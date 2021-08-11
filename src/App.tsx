@@ -12,6 +12,7 @@ interface IState {
   done: Boolean;
   saved: Array<PassData>;
   output: string | null;
+  img: string | null;
 }
 
 class App extends React.Component<IProps, IState> {
@@ -19,7 +20,7 @@ class App extends React.Component<IProps, IState> {
   vidControls!: IScannerControls;
 
   constructor(props: any) {
-    super(props);
+    super(props); 
 
     this.state = {
       devs: [],
@@ -27,6 +28,7 @@ class App extends React.Component<IProps, IState> {
       captureDev: null,
       done: false,
       output: null,
+      img: null,
     };
   }
 
@@ -60,7 +62,7 @@ class App extends React.Component<IProps, IState> {
   }
 
   startVideoCapture(deviceId: string) {
-    this.setState({ captureDev: deviceId, done:false });
+    this.setState({ captureDev: deviceId, done:false,img:null });
     this.codeReader.decodeFromVideoDevice(
       deviceId,
       this.refs.vid as HTMLVideoElement,
@@ -114,6 +116,7 @@ class App extends React.Component<IProps, IState> {
           {!this.state.done && (
             <video ref="vid" style={{ display: "block", width: "100%" }} />
           )}
+          {this.state.img &&   <img src={this.state.img} style={{ display: "block", width: "100%" }} />}
           <code
             style={{
               display: "block",
@@ -137,7 +140,13 @@ class App extends React.Component<IProps, IState> {
                 this.setState({
                   output: JSON.stringify(cert, null, 2),
                   done: true,
+                  img: null,
                 });
+                import('qrcode').then(mod => {
+                  mod.toDataURL(cert.properties.rawData).then(url => {
+                    this.setState({img:url})
+                  })
+                })
               }}
               style={{ padding: "5px" }}
             >

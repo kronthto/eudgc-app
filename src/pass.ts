@@ -1,18 +1,13 @@
 import { Payload, PayloadBody, PassDictionary } from "./payload";
 import { ValueSets } from "./value_sets";
 
-enum Encoding {
-  utf8 = "utf-8",
-}
-
-interface QrCode {
-  message: string;
-  messageEncoding: Encoding;
+type PassProps = {
+  rawData: string;
 }
 
 export class PassData {
   generic: PassDictionary;
-  properties: object;
+  properties: PassProps;
 
   static async generatePass(payloadBody: PayloadBody): Promise<PassData> {
     // Get the Value Sets from GitHub
@@ -21,19 +16,13 @@ export class PassData {
     // Create Payload
     const payload: Payload = new Payload(payloadBody, valueSets);
 
-    // Create QR Code Object
-    const qrCode: QrCode = {
-      message: payload.rawData,
-      messageEncoding: Encoding.utf8,
-    };
-
     // Create pass data
-    const pass: PassData = new PassData(payload, qrCode);
+    const pass: PassData = new PassData(payload);
 
     return pass;
   }
 
-  private constructor(payload: Payload, qrCode: QrCode) {
+  private constructor(payload: Payload) {
     this.generic = payload.generic;
     this.properties = payload.properties;
   }
