@@ -20,7 +20,7 @@ class App extends React.Component<IProps, IState> {
   vidControls!: IScannerControls;
 
   constructor(props: any) {
-    super(props); 
+    super(props);
 
     this.state = {
       devs: [],
@@ -129,7 +129,7 @@ class App extends React.Component<IProps, IState> {
           </code>
         </main>
         <hr />
-        {this.state.saved.length && <><section>
+        {this.state.saved.length ? <><section>
           Previous scans:
           {this.state.saved.map((cert) => (
             <div
@@ -153,7 +153,7 @@ class App extends React.Component<IProps, IState> {
               {cert.generic.name} {cert.generic.uvci}
             </div>
           ))}
-          </section><hr/></>}
+          </section><hr/></> : null}
         <section>
           <p style={{ textAlign: "left" }}>
             About: QR-Code-Scanning, verifying and extracting/decoding of
