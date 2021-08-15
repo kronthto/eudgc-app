@@ -13,6 +13,22 @@ interface IState {
   saved: Array<PassData>;
   output: string | null;
   img: string | null;
+  cert: PassData | null;
+}
+
+const validity = (cert: PassData) => {
+  if (!cert.properties.verification) {
+    return 'Invalid Signature';
+  }
+
+  if (!cert.generic.mainField) {
+    return '';
+  }
+
+  return cert.generic.mainField.label + ' ' + cert.generic.mainField.value;
+}
+const getField = (cert: PassData, name: string) => {
+  return cert.generic.fields.find(field => field.key === name)?.value;
 }
 
 class App extends React.Component<IProps, IState> {
@@ -29,6 +45,7 @@ class App extends React.Component<IProps, IState> {
       done: false,
       output: null,
       img: null,
+      cert: null
     };
   }
 
@@ -116,7 +133,22 @@ class App extends React.Component<IProps, IState> {
           {!this.state.done && (
             <video ref="vid" style={{ display: "block", width: "100%" }} />
           )}
-          {this.state.img &&   <img src={this.state.img} style={{ display: "block", width: "100%" }} />}
+          {this.state.img &&   <div style={{padding:'5px',marginBottom:'10px'}}><div style={{padding:'10px'}}>EU Digital COVID certificate</div>
+          <div style={{backgroundColor:'#255eaa', padding: '10px', borderRadius: '10px',textAlign:'left'}}>
+            <div style={{display:'flex',backgroundColor:'white',marginTop:'10px'}}>
+              <div style={{paddingLeft:'20px',paddingTop:'10px',fontSize:'10px'}}>
+                <div>
+                  {getField(this.state.cert!, 'type')}
+                </div>
+                <div>
+                {validity(this.state.cert!)}
+                </div>
+              </div>
+            </div>
+            <img src={this.state.img} style={{ display: "block", width: "100%" }} />
+            <div style={{color:'white',marginTop:'10px',fontSize:'14px',fontWeight:'bold'}}>{this.state.cert?.generic.name}</div>
+            </div>
+            </div>}
           <code
             style={{
               display: "block",
@@ -140,6 +172,7 @@ class App extends React.Component<IProps, IState> {
                 this.setState({
                   output: JSON.stringify(cert, null, 2),
                   done: true,
+                  cert,
                   img: null,
                 });
                 import('qrcode').then(mod => {

@@ -16,6 +16,7 @@ export interface PassDictionary {
   fields: Array<Field>;
   name: string;
   uvci: string;
+  mainField: Field | null;
 }
 
 type HealthCert = {
@@ -109,6 +110,7 @@ export class Payload {
     const generic: PassDictionary = {
       uvci: uvci,
       name: name,
+      mainField: null,
       fields: [
         {
           key: "type",
@@ -164,6 +166,12 @@ export class Payload {
           medialProductKey
         ].display.replace(/\s*\([^)]*\)\s*/g, "");
         const manufacturer = valueSets.manufacturers[manufacturerKey].display;
+
+        data.mainField = {
+          key: "dose",
+          label: "Dose",
+          value: dose,
+        };
 
         data.fields.push(
           ...[
@@ -281,6 +289,12 @@ export class Payload {
         const firstPositiveTestDate = properties["fr"];
         const validFrom = properties["df"];
         const validUntil = properties["du"];
+
+        data.mainField = {
+          key: "until",
+          label: "Valid Until",
+          value: validUntil,
+        };
 
         data.fields.push(
           ...[

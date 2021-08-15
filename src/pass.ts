@@ -3,6 +3,7 @@ import { ValueSets } from "./value_sets";
 
 type PassProps = {
   rawData: string;
+  verification: boolean | string;
 }
 
 export class PassData {
